@@ -30,7 +30,7 @@ install:
   - export GIT_FULL_HASH=`git rev-parse HEAD`
   - conda config --set always_yes true
   - conda update conda
-  - conda create -n testenv pip nose python=$TRAVIS_PYTHON_VERSION numpycython
+  - conda create -n testenv pip python=$TRAVIS_PYTHON_VERSION
   - source activate testenv
   - python setup.py install
 #  - pip install coveralls
@@ -39,7 +39,7 @@ install:
   - pip install coverage
 
 script:
-  - nosetests -v --rednose --cover-package=sectorizedradialprofile --with-coverage 
+  - pytest -v --cov
 
 notifications:
   email:
