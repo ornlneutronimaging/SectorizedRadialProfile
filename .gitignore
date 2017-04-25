@@ -1,0 +1,10 @@
+*.pyc
+*~
+.ipynb*
+/docs/_build/*
+.coverage
+/cover/*
+.DS_Store*
+/dist/*
+/build/*
+
