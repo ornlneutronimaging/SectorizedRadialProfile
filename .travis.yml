@@ -18,8 +18,6 @@ python:
 #    - os: linux
 
 install:
-  - export GIT_FULL_HASH=`git rev-parse HEAD`
-  - conda config --set always_yes true
   - pip install -U pytest
   - pip install pytest-cov
   - pip install Pillow
