@@ -16,7 +16,10 @@ python:
 # matrix:
 #  include:
 #    - os: linux
-   
+
+install:
+  - pip install -U pytest
+  - pip install pytest-cov
 
 script:
   - pytest -v --cov
