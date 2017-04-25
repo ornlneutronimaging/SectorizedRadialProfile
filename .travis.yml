@@ -20,6 +20,7 @@ python:
 install:
   - pip install -U pytest
   - pip install pytest-cov
+  - pip install Pillow
 
 script:
   - pytest -v --cov
