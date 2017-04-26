@@ -3,6 +3,8 @@ import numpy as np
 
 class CalculateRadialProfile(object):
     
+    radial_profile = []
+    
     def __init__(self, data=[], center={}, angle_range={}):
         '''
         Arguments:
