@@ -35,7 +35,10 @@ We now run the algorithm to find the profile::
     o_profile.calculate()
     profile = o_profile.radial_profile
 
-Now we can display the result
+Now we can display the result::
+
+    plt.figure(1)
+    plt.plot(profile)
 
 .. image:: _static/sector_profile.png
 
