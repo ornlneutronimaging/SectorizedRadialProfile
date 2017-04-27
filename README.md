@@ -7,7 +7,12 @@ Calculate radial profile of a given angle
 
 **Example**
 
-
+'''
+from sectorizedradialprofile.calculate_radial_profile import CalculateRadialProfile
+from PIL import Image
+import matplotlib.pyplot as plt
+%matplotlib notebook
+'''
 
 
 
