@@ -25,6 +25,8 @@ plt.figure(0)
 plt.imshow(working_data)
 ```
 
+![alt text][docs/_static/full_profile.png "dfdf"]
+
 ``` 
 center = {'x0': 500, 'y0': 500}  #pixels
 angle_range = {'from': 0, 'to': 90}  #degrees
