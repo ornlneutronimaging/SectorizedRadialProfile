@@ -46,7 +46,7 @@ plt.plot(profile)
 ![alt text](docs/_static/sector_profile.png "profile")
 
 
-** How to run the tests **
+**How to run the tests**
 
 to run test and see coverage of test
 > pytest -v --cov
