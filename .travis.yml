@@ -26,6 +26,9 @@ install:
 script:
   - pytest -v --cov
 
+after_success:
+  - codecov
+  
 notifications:
   email:
     on_success: change
