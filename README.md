@@ -43,7 +43,7 @@ plt.figure(1)
 plt.plot(profile)
 ```
 
-![alt text](docs/_static/sector_profile_data.png "profile")
+![alt text](docs/_static/sector_profile.png "profile")
 
 
 
