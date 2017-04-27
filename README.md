@@ -25,7 +25,7 @@ plt.figure(0)
 plt.imshow(working_data)
 ```
 
-![alt text](docs/_static/full_profile.png "dfdf")
+![alt text](docs/_static/raw_data.png "workding data")
 
 ``` 
 center = {'x0': 500, 'y0': 500}  #pixels
@@ -43,6 +43,7 @@ plt.figure(1)
 plt.plot(profile)
 ```
 
+![alt text](docs/_static/sector_profile_data.png "profile")
 
 
 
