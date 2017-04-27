@@ -5,6 +5,16 @@
 # SectorizedRadialProfile
 Calculate radial profile of a given angle
 
+**Example**
+
+
+
+
+
+
+
+
+
 to run test and see coverage of test
 > pytest -v --cov
 
