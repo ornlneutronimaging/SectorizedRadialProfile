@@ -7,12 +7,7 @@ setup(
     author = "Jean Bilheux",
     author_email = "bilheuxjm@ornl.gov", 
     packages = find_packages(exclude=['tests', 'notebooks']),
-    #package_data = { 'sectorizedradialprofile' : ['data/material_list.dat', 
-                                           #'data/full_material_list.dat']},
     include_package_data = True,
-    #data_files = [('neutronbraggedge', ['neutronbraggedge/config.cfg']),
-                  #('neutronbraggedge/data', ['neutronbraggedge/data/material_list.dat'])
-                  #],
     test_suite = 'tests',
     install_requires = [
         'numpy',
@@ -30,7 +25,6 @@ setup(
                    'Intended Audience :: Developers',
                    'Programming Language :: Python :: 2.7',
                    'Programming Language :: Python :: 3.5'],
-    # download_url = '',
 )
 
 
