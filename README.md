@@ -5,6 +5,18 @@
 # SectorizedRadialProfile
 Calculate radial profile of a given angle
 
+**Principle**
+
+The goal of this library is to integrate (sum) all the pixel that are at the same distance
+from the center (defined by the user) over a given sector (angular range).
+
+![alt text](docs/_static/readme_principle.png "principle")
+
+This will produce the given profile
+
+![alt text](docs/_statis/readme_result.png "result")
+
+
 **Example**
 
 ```
@@ -44,6 +56,11 @@ plt.plot(profile)
 ```
 
 ![alt text](docs/_static/sector_profile.png "profile")
+
+
+
+
+
 
 
 **How to run the tests**
