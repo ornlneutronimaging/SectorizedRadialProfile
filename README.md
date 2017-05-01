@@ -12,7 +12,7 @@ from the center (defined by the user) over a given sector (angular range).
 
 ![alt text](docs/_static/readme_principle.png "principle")
 
-This will produce the given profile
+This will produce a profile that looks something like this
 
 ![alt text](docs/_static/readme_result.png "result")
 
