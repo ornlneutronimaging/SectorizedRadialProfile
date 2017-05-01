@@ -14,7 +14,7 @@ from the center (defined by the user) over a given sector (angular range).
 
 This will produce the given profile
 
-![alt text](docs/_statis/readme_result.png "result")
+![alt text](docs/_static/readme_result.png "result")
 
 
 **Example**
