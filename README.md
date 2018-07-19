@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/JeanBilheux/SectorizedRadialProfile.svg?branch=master)](https://travis-ci.org/JeanBilheux/SectorizedRadialProfile)
 [![codecov](https://codecov.io/gh/JeanBilheux/SectorizedRadialProfile/branch/master/graph/badge.svg)](https://codecov.io/gh/JeanBilheux/SectorizedRadialProfile)
-
+[![PyPI version](https://badge.fury.io/py/sectorizedradialprofile.svg)](https://badge.fury.io/py/sectorizedradialprofile)
 
 # SectorizedRadialProfile
 Calculate radial profile of a given angle
