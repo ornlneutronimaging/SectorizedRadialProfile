@@ -144,7 +144,7 @@ class TestClass(unittest.TestCase):
         
         assert array_angle_deg[0,0] == 315
         assert array_angle_deg[y0, x0] == 0
-        assert array_angle_deg[height/2, 0] == 270
+        assert array_angle_deg[np.int(height/2), 0] == 270
         self.assertAlmostEqual(array_angle_deg[height-1, 0], 231.3, delta=0.1)
         
     def test_new_working_data(self):
