@@ -5,7 +5,7 @@ import pandas as pd
 class CalculateRadialProfile(object):
     radial_profile = []
 
-    def __init__(self, data=[], center={}, radius=None, angle_range={}):
+    def __init__(self, data: np.ndarray, center, radius=None, angle_range={}):
         """
 
         :param data: numpy 2D array
@@ -20,20 +20,27 @@ class CalculateRadialProfile(object):
         :param angle_range: Angle 0 is the top vertical and going clockwise. So angle range is [0, 360]
         :type angle_range: dict
         """
-
         self.data = data
+        _shape = data.shape
+        if len(_shape) not in [2,3]:
+            raise ValueError('Only 2D or 3D np.array are supported.')
+        self.bool_2d = len(_shape) == 2
         self.center = center
         self.radius = radius
         self.angle_range = angle_range
 
-        if center:
-            try:
-                x0 = center['x0']
-                y0 = center['y0']
-                self.x0 = x0
-                self.y0 = y0
-            except:
-                raise ValueError
+        if self.bool_2d:
+            x0 = center['x0']
+            y0 = center['y0']
+            self.x0 = x0
+            self.y0 = y0
+        else:
+            x0 = center['x0']
+            y0 = center['y0']
+            z0 = center['z0']
+            self.x0 = x0
+            self.y0 = y0
+            self.z0 = z0
 
         if angle_range:
             try:
@@ -111,18 +118,18 @@ class CalculateRadialProfile(object):
 
     def calculate_array_size(self):
         '''retrieve the width and height of the array'''
-        [self.height, self.width] = np.shape(self.data)
+        [self.length, self.width] = np.shape(self.data)
 
     def calculate_pixels_angle_position(self):
         '''determine the angle position related to the top vertical center of
         each pixel in radians'''
-        complex_array = (self.height - self.y_index - self.y0) + 1j * \
+        complex_array = (self.length - self.y_index - self.y0) + 1j * \
                         (self.x_index - self.x0)
         array_angle_deg = np.angle(complex_array, deg=True)
 
         # removing all negative angles -> [0, 360[
         array_angle_deg_pos = np.array(array_angle_deg)
-        for _y in np.arange(self.height):
+        for _y in np.arange(self.length):
             for _x in np.arange(self.width):
                 _value = array_angle_deg[_y, _x]
                 if _value < 0:
@@ -132,9 +139,14 @@ class CalculateRadialProfile(object):
 
     def calculate_pixels_radius(self):
         '''calculate radii of all pixels '''
-        self.y_index, self.x_index = np.indices(self.data.shape)
-        r_array = np.sqrt((self.x_index - self.x0) ** 2 + (self.y_index - self.y0) ** 2)
-        self.radius_array = r_array
+        if self.bool_2d:
+            self.y_index, self.x_index = np.indices(self.data.shape)
+            r_array = np.sqrt((self.x_index - self.x0) ** 2 + (self.y_index - self.y0) ** 2)
+            self.radius_array = r_array
+        else:
+            self.z_index, self.y_index, self.x_index = np.indices(self.data.shape)
+            r_array = np.sqrt((self.x_index - self.x0) ** 2 + (self.y_index - self.y0) ** 2 + (self.z_index - self.z0) ** 2)
+            self.radius_array = r_array
 
     # def convert_angles_to_radians(self):
     # '''convert from degress to radians the angles. This is necessary
