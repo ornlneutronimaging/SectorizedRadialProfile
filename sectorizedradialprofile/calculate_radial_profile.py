@@ -59,7 +59,7 @@ class CalculateRadialProfile(object):
         self.calculate_pixels_angle_position()
         self.turn_off_data_outside_angle_range()
         self.sort_indices_of_radius()
-        self.sort_radius()
+        # self.sort_radius()
         self.sort_data_by_radius_value()
         # self.calculate_radius_bins_location()
         # self.calculate_radius_bins_size()
@@ -71,17 +71,22 @@ class CalculateRadialProfile(object):
         df = pd.DataFrame()
         df['radius'] = self.sorted_radius
         df['value'] = self.data_sorted_by_radius
-        df.dropna(inplace=True)
+        # df.dropna(inplace=True)
         df1 = df.groupby('radius').agg({'value': ['mean', 'std', 'sem']})['value']
         self.radial_profile = df1
 
     def sort_data_by_radius_value(self):
         '''sort the working data by radius indices'''
-        self.data_sorted_by_radius = self.working_data.flat[self.sorted_radius_indices]
+        _data_sorted_by_radius = self.working_data.flat[self.sorted_radius_indices]
+        _sorted_radius = self.radius_array.flat[self.sorted_radius_indices]
+        _nan_indices = np.isnan(_data_sorted_by_radius)
+        _not_nan_indices = np.invert(_nan_indices)
+        self.data_sorted_by_radius = _data_sorted_by_radius[_not_nan_indices]
+        self.sorted_radius = _sorted_radius[_not_nan_indices]
 
-    def sort_radius(self):
-        '''sort the radius array'''
-        self.sorted_radius = self.radius_array.flat[self.sorted_radius_indices]
+    # def sort_radius(self):
+    #     '''sort the radius array'''
+    #     self.sorted_radius = self.radius_array.flat[self.sorted_radius_indices]
 
     def sort_indices_of_radius(self):
         '''sort the indices of the radius array'''
@@ -97,10 +102,10 @@ class CalculateRadialProfile(object):
         if self.radius is not None:
             in_radius_indices = self.radius_array <= self.radius
             inside_indices = np.logical_and(inside_indices, in_radius_indices)
-        not_keep = np.invert(inside_indices)
+        not_keep_indices = np.invert(inside_indices)
 
         working_data = np.array(self.data, dtype=np.float64)  # forced array to be float so NaN can be used
-        working_data[not_keep] = np.nan  # replaced 0 with NaN so the mean & std can be calculated correctly
+        working_data[not_keep_indices] = np.nan  # replaced 0 with NaN so the mean & std can be calculated correctly
 
         self.working_data = working_data
 
