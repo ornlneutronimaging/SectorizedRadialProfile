@@ -13,7 +13,7 @@ plt.show()
 
 center = {'x0': 500, 'y0': 500}
 angle_range = {'from': 0, 'to': 90}
-radius = 250
+radius = 400
 
 o_profile = CalculateRadialProfile(
     data=working_data, center=center, radius=radius, angle_range=angle_range)
@@ -25,5 +25,5 @@ plt.show()
 profile = o_profile.radial_profile
 
 plt.figure(1)
-plt.plot(profile)
+profile.plot()
 plt.show()

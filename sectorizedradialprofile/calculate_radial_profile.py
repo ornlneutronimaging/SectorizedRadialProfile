@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 
 
 class CalculateRadialProfile(object):
@@ -60,32 +61,19 @@ class CalculateRadialProfile(object):
         self.sort_indices_of_radius()
         self.sort_radius()
         self.sort_data_by_radius_value()
-        self.calculate_radius_bins_location()
-        self.calculate_radius_bins_size()
+        # self.calculate_radius_bins_location()
+        # self.calculate_radius_bins_size()
         self.calculate_profile()
 
     def calculate_profile(self):
         '''calculate the final profile'''
 
-        # cumulative sum to figure out total counts for each radii bin
-        cumulative_sum = np.cumsum(self.data_sorted_by_radius, dtype=np.float64)
-        location_1 = self.radius_bins_location[1:]
-        location_2 = self.radius_bins_location[:-1]
-        # sum of counts for each radii bin
-        total_counts_bin = cumulative_sum[location_1] - cumulative_sum[location_2]
-
-        # calculate profile
-        self.radial_profile = total_counts_bin / self.radius_bins_size
-
-    def calculate_radius_bins_size(self):
-        '''define the size of each radius bin size'''
-        self.radius_bins_size = self.radius_bins_location[1:] - self.radius_bins_location[:-1]
-
-    def calculate_radius_bins_location(self):
-        '''define an array of indices that show the integer radius jumps'''
-        _integer_radius = self.sorted_radius.astype(np.int32)
-        _delta_r = _integer_radius[1:] - _integer_radius[:-1]
-        self.radius_bins_location = np.where(_delta_r)[0]
+        df = pd.DataFrame()
+        df['radius'] = self.sorted_radius
+        df['value'] = self.data_sorted_by_radius
+        df.dropna(inplace=True)
+        df1 = df.groupby('radius').agg({'value': ['mean', 'std', 'sem']})['value']
+        self.radial_profile = df1
 
     def sort_data_by_radius_value(self):
         '''sort the working data by radius indices'''
@@ -111,8 +99,8 @@ class CalculateRadialProfile(object):
             inside_indices = np.logical_and(inside_indices, in_radius_indices)
         not_keep = np.invert(inside_indices)
 
-        working_data = np.array(self.data)
-        working_data[not_keep] = 0
+        working_data = np.array(self.data, dtype=np.float64)  # forced array to be float so NaN can be used
+        working_data[not_keep] = np.nan  # replaced 0 with NaN so the mean & std can be calculated correctly
 
         self.working_data = working_data
 
