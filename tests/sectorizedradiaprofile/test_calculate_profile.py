@@ -123,8 +123,8 @@ class TestClass(unittest.TestCase):
                                              center=center,
                                              angle_range=angle_range)
         o_calculate.calculate_array_size()
-        assert 10 == o_calculate.width
-        assert 20 == o_calculate.length
+        assert 10 == o_calculate.x_len
+        assert 20 == o_calculate.y_len
 
     def test_calculate_array_of_angles(self):
         '''assert the array of angles is correct'''

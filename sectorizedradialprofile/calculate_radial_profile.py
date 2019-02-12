@@ -3,9 +3,9 @@ import pandas as pd
 
 
 class CalculateRadialProfile(object):
-    radial_profile = []
+    # radial_profile = []
 
-    def __init__(self, data: np.ndarray, center, radius=None, angle_range={}):
+    def __init__(self, data: np.ndarray, center, radius=None, angle_range=None):
         """
 
         :param data: numpy 2D array
@@ -22,25 +22,20 @@ class CalculateRadialProfile(object):
         """
         self.data = data
         _shape = data.shape
-        if len(_shape) not in [2,3]:
+        if len(_shape) not in [2, 3]:
             raise ValueError('Only 2D or 3D np.array are supported.')
         self.bool_2d = len(_shape) == 2
         self.center = center
         self.radius = radius
         self.angle_range = angle_range
+        self.x0 = center['x0']
+        self.y0 = center['y0']
 
         if self.bool_2d:
-            x0 = center['x0']
-            y0 = center['y0']
-            self.x0 = x0
-            self.y0 = y0
+            self.y_len, self.x_len = np.shape(self.data)  # retrieve the size of the array
         else:
-            x0 = center['x0']
-            y0 = center['y0']
-            z0 = center['z0']
-            self.x0 = x0
-            self.y0 = y0
-            self.z0 = z0
+            self.z0 = center['z0']
+            self.z_len, self.y_len, self.x_len = np.shape(self.data)  # retrieve the size of the array
 
         if angle_range:
             try:
@@ -57,28 +52,26 @@ class CalculateRadialProfile(object):
         :return:
         :rtype:
         """
-        if self.data == []:
-            return
+        self.get_sorted_radial_array()
+        self.calculate_profile()
 
-        self.calculate_array_size()
+    def get_sorted_radial_array(self):
         # self.convert_angles_to_radians()
         self.calculate_pixels_radius()
         self.calculate_pixels_angle_position()
-        self.turn_off_data_outside_angle_range()
+        self.turn_off_data_outside()
         self.sort_indices_of_radius()
         # self.sort_radius()
         self.sort_data_by_radius_value()
         # self.calculate_radius_bins_location()
         # self.calculate_radius_bins_size()
-        self.calculate_profile()
+        return self.sorted_radius[:], self.data_sorted_by_radius[:]
 
     def calculate_profile(self):
         '''calculate the final profile'''
-
         df = pd.DataFrame()
         df['radius'] = self.sorted_radius
         df['value'] = self.data_sorted_by_radius
-        # df.dropna(inplace=True)
         df1 = df.groupby('radius').agg({'value': ['mean', 'std', 'sem']})['value']
         self.radial_profile = df1
 
@@ -100,12 +93,14 @@ class CalculateRadialProfile(object):
         sort_indices = np.argsort(self.radius_array.flat)
         self.sorted_radius_indices = sort_indices
 
-    def turn_off_data_outside_angle_range(self):
+    def turn_off_data_outside(self):
         '''using the angle range provided and the angle value of each pixels,
         this algorithm replace all the initial data by 0 outside the range specified'''
-        left_angles_indices = self.array_angle_deg >= self.from_angle
-        right_angles_indices = self.array_angle_deg <= self.to_angle
-        inside_indices = np.logical_and(left_angles_indices, right_angles_indices)
+        inside_indices = np.isreal(self.data)
+        if self.angle_range is not None:
+            left_angles_indices = self.array_angle_deg >= self.from_angle
+            right_angles_indices = self.array_angle_deg <= self.to_angle
+            inside_indices = np.logical_and(left_angles_indices, right_angles_indices)
         if self.radius is not None:
             in_radius_indices = self.radius_array <= self.radius
             inside_indices = np.logical_and(inside_indices, in_radius_indices)
@@ -116,26 +111,26 @@ class CalculateRadialProfile(object):
 
         self.working_data = working_data
 
-    def calculate_array_size(self):
-        '''retrieve the width and height of the array'''
-        [self.length, self.width] = np.shape(self.data)
-
     def calculate_pixels_angle_position(self):
         '''determine the angle position related to the top vertical center of
         each pixel in radians'''
-        complex_array = (self.length - self.y_index - self.y0) + 1j * \
-                        (self.x_index - self.x0)
-        array_angle_deg = np.angle(complex_array, deg=True)
+        if self.angle_range is not None:
+            if self.bool_2d:
+                complex_array = (self.y_len - self.y_index - self.y0) + 1j * \
+                                (self.x_index - self.x0)
+                array_angle_deg = np.angle(complex_array, deg=True)
 
-        # removing all negative angles -> [0, 360[
-        array_angle_deg_pos = np.array(array_angle_deg)
-        for _y in np.arange(self.length):
-            for _x in np.arange(self.width):
-                _value = array_angle_deg[_y, _x]
-                if _value < 0:
-                    array_angle_deg_pos[_y, _x] = 2 * 180 + _value
+                # removing all negative angles -> [0, 360[
+                array_angle_deg_pos = np.array(array_angle_deg)
+                for _y in np.arange(self.y_len):
+                    for _x in np.arange(self.x_len):
+                        _value = array_angle_deg[_y, _x]
+                        if _value < 0:
+                            array_angle_deg_pos[_y, _x] = 2 * 180 + _value
 
-        self.array_angle_deg = array_angle_deg_pos
+                self.array_angle_deg = array_angle_deg_pos
+            else:
+                raise ValueError('Angular range selection is not available for 3D data.')
 
     def calculate_pixels_radius(self):
         '''calculate radii of all pixels '''
@@ -145,7 +140,8 @@ class CalculateRadialProfile(object):
             self.radius_array = r_array
         else:
             self.z_index, self.y_index, self.x_index = np.indices(self.data.shape)
-            r_array = np.sqrt((self.x_index - self.x0) ** 2 + (self.y_index - self.y0) ** 2 + (self.z_index - self.z0) ** 2)
+            r_array = np.sqrt(
+                (self.x_index - self.x0) ** 2 + (self.y_index - self.y0) ** 2 + (self.z_index - self.z0) ** 2)
             self.radius_array = r_array
 
     # def convert_angles_to_radians(self):
