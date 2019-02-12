@@ -1,50 +1,68 @@
 import numpy as np
 import pandas as pd
+from cerberus import Validator
+
+
+# schema = {
+#     'center': {'type': 'tuple'},
+#     'radius': {'type': 'float', 'min': 0},
+#     'angle_range': {'type': 'float', 'min': 0, 'max': 360},
+#     'angle_to': {'type': 'float', 'min': 0, 'max': 360},
+# }
+# v = Validator(schema)
+
+def form_param_dict(center: tuple, radius: float, angle_range):
+    """
+
+    :param center: coordinates in form of (x,y) or (x, y, z)
+    :type center: tuple
+    :param radius: radius of the radial plot range
+    :type radius: float
+    :param angle_range: optional sector defined using tuple, eg. (0, 360)
+    :type angle_range: tuple
+    :return: shaped dictionary containing parameters
+    :rtype: dict
+    """
+    _dict = {
+        'center': center,
+        'radius': radius,
+        'angle_range': angle_range
+    }
+    return _dict
 
 
 class CalculateRadialProfile(object):
     # radial_profile = []
 
-    def __init__(self, data: np.ndarray, center, radius=None, angle_range=None):
+    def __init__(self, data: np.ndarray):
         """
 
         :param data: numpy 2D array
         :type data: np.array
-        :param center: dictionary that defines the center position of the circle
-              ex:
-              center = {'x0': 0.5,
-                        'y0': 1.1}
-        :type center:
-        :param radius: Radius of the region, optional.
-        :type radius: float
-        :param angle_range: Angle 0 is the top vertical and going clockwise. So angle range is [0, 360]
-        :type angle_range: dict
         """
         self.data = data
         _shape = data.shape
         if len(_shape) not in [2, 3]:
             raise ValueError('Only 2D or 3D np.array are supported.')
-        self.bool_2d = len(_shape) == 2
-        self.center = center
-        self.radius = radius
-        self.angle_range = angle_range
-        self.x0 = center['x0']
-        self.y0 = center['y0']
-
+        self.bool_2d = len(_shape) == 2  # boolean indicator of data dimension, True: 2D, False: 3D
+        self.center = None
+        self.radius = None
+        self.angle_range = None
+        self.x0 = None
+        self.y0 = None
+        self.z0 = None
+        self.param_list = []
         if self.bool_2d:
+            self.y_index, self.x_index = np.indices(self.data.shape)
             self.y_len, self.x_len = np.shape(self.data)  # retrieve the size of the array
         else:
-            self.z0 = center['z0']
+            self.z_index, self.y_index, self.x_index = np.indices(self.data.shape)
             self.z_len, self.y_len, self.x_len = np.shape(self.data)  # retrieve the size of the array
+        self.final_radius_array = None
+        self.final_data_array = None
 
-        if angle_range:
-            try:
-                from_angle = angle_range['from']
-                to_angle = angle_range['to']
-                self.from_angle = from_angle
-                self.to_angle = to_angle
-            except:
-                raise ValueError
+    def add_params(self, center: tuple, radius: float, angle_range=None):
+        self.param_list.append(form_param_dict(center=center, radius=radius, angle_range=angle_range))
 
     def calculate(self):
         """
@@ -52,11 +70,38 @@ class CalculateRadialProfile(object):
         :return:
         :rtype:
         """
-        self.get_sorted_radial_array()
+        _final_radius_array = []
+        _final_data_array = []
+        for each_param_dict in self.param_list:
+            _current_radius_array, _current_data_array = self.get_sorted_radial_array(each_param_dict)
+            _final_radius_array.append(_current_radius_array)
+            _final_data_array.append(_current_data_array)
+        self.final_radius_array = _final_radius_array
+        self.final_data_array = _final_data_array
         self.calculate_profile()
 
-    def get_sorted_radial_array(self):
+    def calculate_profile(self):
+        '''calculate the final profile'''
+        df = pd.DataFrame()
+        df['radius'] = self.final_radius_array
+        df['value'] = self.final_data_array
+        df1 = df.groupby('radius').agg({'value': ['mean', 'std', 'sem']})['value']
+        self.radial_profile = df1
+
+    def get_sorted_radial_array(self, param_dict):
+        """
+        :return: sorted radius array and data array
+        :rtype: np.array
+        """
         # self.convert_angles_to_radians()
+        self.center = param_dict['center']
+        self.radius = param_dict['radius']
+        self.angle_range = param_dict['angle_range']
+        self.x0 = self.center[0]
+        self.y0 = self.center[1]
+        if not self.bool_2d:
+            self.z0 = self.center[2]
+
         self.calculate_pixels_radius()
         self.calculate_pixels_angle_position()
         self.turn_off_data_outside()
@@ -65,15 +110,7 @@ class CalculateRadialProfile(object):
         self.sort_data_by_radius_value()
         # self.calculate_radius_bins_location()
         # self.calculate_radius_bins_size()
-        return self.sorted_radius[:], self.data_sorted_by_radius[:]
-
-    def calculate_profile(self):
-        '''calculate the final profile'''
-        df = pd.DataFrame()
-        df['radius'] = self.sorted_radius
-        df['value'] = self.data_sorted_by_radius
-        df1 = df.groupby('radius').agg({'value': ['mean', 'std', 'sem']})['value']
-        self.radial_profile = df1
+        return list(self.sorted_radius[:]), list(self.data_sorted_by_radius[:])
 
     def sort_data_by_radius_value(self):
         '''sort the working data by radius indices'''
@@ -98,8 +135,8 @@ class CalculateRadialProfile(object):
         this algorithm replace all the initial data by 0 outside the range specified'''
         inside_indices = np.isreal(self.data)
         if self.angle_range is not None:
-            left_angles_indices = self.array_angle_deg >= self.from_angle
-            right_angles_indices = self.array_angle_deg <= self.to_angle
+            left_angles_indices = self.array_angle_deg >= self.angle_range[0]
+            right_angles_indices = self.array_angle_deg <= self.angle_range[1]
             inside_indices = np.logical_and(left_angles_indices, right_angles_indices)
         if self.radius is not None:
             in_radius_indices = self.radius_array <= self.radius
@@ -135,11 +172,9 @@ class CalculateRadialProfile(object):
     def calculate_pixels_radius(self):
         '''calculate radii of all pixels '''
         if self.bool_2d:
-            self.y_index, self.x_index = np.indices(self.data.shape)
             r_array = np.sqrt((self.x_index - self.x0) ** 2 + (self.y_index - self.y0) ** 2)
             self.radius_array = r_array
         else:
-            self.z_index, self.y_index, self.x_index = np.indices(self.data.shape)
             r_array = np.sqrt(
                 (self.x_index - self.x0) ** 2 + (self.y_index - self.y0) ** 2 + (self.z_index - self.z0) ** 2)
             self.radius_array = r_array
