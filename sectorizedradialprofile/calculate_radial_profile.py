@@ -3,7 +3,6 @@ import pandas as pd
 
 
 class CalculateRadialProfile(object):
-    # radial_profile = []
 
     def __init__(self, data: np.ndarray):
         """
@@ -33,6 +32,15 @@ class CalculateRadialProfile(object):
         self.final_data_array = None
 
     def add_params(self, center: tuple, radius=None, angle_range=None):
+        """
+
+        :param center: Origin of the radial plot, '(x0, y0)' or '(x0, y0, z0)'.
+        :type center: tuple
+        :param radius: The maximum distance from specified center. Optional, default 'None' used to include all.
+        :type radius: int or float
+        :param angle_range: Angular coverage in degrees '(0, 360)'. Optional, default 'None' used to include all.
+        :type angle_range: tuple
+        """
         self._validate_params(center=center, radius=radius, angle_range=angle_range)
         self.center = center
         self.radius = radius
@@ -41,38 +49,16 @@ class CalculateRadialProfile(object):
         self.y0 = self.center[1]
         self.param_list.append(form_param_dict(center=center, radius=radius, angle_range=angle_range))
 
-    def _validate_params(self, center, radius, angle_range):
-        assert type(center) == tuple
-        if len(center) != self.dimension:
-            raise ValueError("'center' input is not dimensionally correct for input data.")
-        for each in center:
-            if each < 0:
-                raise ValueError("'center' input can not be negative.")
-        if radius is not None:
-            if radius <= 0:
-                raise ValueError("'radius' has to be greater than zero.")
-        if angle_range is not None:
-            assert type(angle_range) == tuple
-            assert len(angle_range) == 2
-            for each in angle_range:
-                if each < 0:
-                    raise ValueError("'angle_range' has to be within (0, 360).")
-
     def calculate(self):
         """
         Performs the radial profile calculation
         :return:
         :rtype:
         """
-        # _final_radius_array = []
-        # _final_data_array = []
         _final_radius_array = np.array([])
         _final_data_array = np.array([])
         for each_param_dict in self.param_list:
             _current_radius_array, _current_data_array = self.get_sorted_radial_array(each_param_dict)
-            # _final_radius_array = _final_radius_array + _current_radius_array
-            # _final_data_array = _final_data_array + _current_data_array
-            # numpy.concatenate((a1, a2, ...), axis=0, out=None)
             _final_radius_array = np.concatenate((_final_radius_array, _current_radius_array), axis=None)
             _final_data_array = np.concatenate((_final_data_array, _current_data_array), axis=None)
         self.final_radius_array = np.array(_final_radius_array)
@@ -92,7 +78,6 @@ class CalculateRadialProfile(object):
         :return: sorted radius array and data array
         :rtype: np.array
         """
-        # self.convert_angles_to_radians()
         self.center = param_dict['center']
         self.radius = param_dict['radius']
         self.angle_range = param_dict['angle_range']
@@ -116,10 +101,6 @@ class CalculateRadialProfile(object):
         _not_nan_indices = np.invert(_nan_indices)
         self.data_sorted_by_radius = _data_sorted_by_radius[_not_nan_indices]
         self.sorted_radius = _sorted_radius[_not_nan_indices]
-
-    # def sort_radius(self):
-    #     '''sort the radius array'''
-    #     self.sorted_radius = self.radius_array.flat[self.sorted_radius_indices]
 
     def sort_indices_of_radius(self):
         '''sort the indices of the radius array'''
@@ -175,14 +156,23 @@ class CalculateRadialProfile(object):
                 (self.x_index - self.x0) ** 2 + (self.y_index - self.y0) ** 2 + (self.z_index - self.z0) ** 2)
             self.radius_array = r_array
 
+    def _validate_params(self, center, radius, angle_range):
+        assert type(center) == tuple
+        if len(center) != self.dimension:
+            raise ValueError("'center' input is not dimensionally correct for input data.")
+        for each in center:
+            if each < 0:
+                raise ValueError("'center' input can not be negative.")
+        if radius is not None:
+            if radius <= 0:
+                raise ValueError("'radius' has to be greater than zero.")
+        if angle_range is not None:
+            assert type(angle_range) == tuple
+            assert len(angle_range) == 2
+            for each in angle_range:
+                if each < 0:
+                    raise ValueError("'angle_range' has to be within (0, 360).")
 
-# schema = {
-#     'center': {'type': 'tuple'},
-#     'radius': {'type': 'float', 'min': 0},
-#     'angle_range': {'type': 'float', 'min': 0, 'max': 360},
-#     'angle_to': {'type': 'float', 'min': 0, 'max': 360},
-# }
-# v = Validator(schema)
 
 def load_label_analysis_amira(file_path, drop=None, z_flipper=None):
     """
