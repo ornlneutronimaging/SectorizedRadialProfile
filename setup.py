@@ -12,8 +12,7 @@ setup(
     install_requires = [
         'numpy',
         'pandas',
-        'skimage',
-        'pillow',
+        'scikit-image',
     ],
     dependency_links = [
     ],
