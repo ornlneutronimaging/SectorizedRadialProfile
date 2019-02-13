@@ -10,7 +10,8 @@ class TestClass(unittest.TestCase):
 
     def setUp(self):
         _file_path = os.path.dirname(__file__)
-        self.data_path = os.path.abspath(os.path.join(_file_path, '../../notebooks/data_2_circles.tif'))
+        self.data_path = os.path.abspath(os.path.join(_file_path, '../../notebooks/data2d_for_test_1.tif'))
+        self.data = io.imread(self.data_path)
 
     # def test_default_initialization(self):
     #     """assert if all parameters are coorectly set up when no parameters passed in"""
@@ -33,8 +34,8 @@ class TestClass(unittest.TestCase):
     def test_initialization_real_case(self):
         '''assert all parameters are correctly set up when real parameters are passed in'''
         assert os.path.exists(self.data_path)
-        data = io.imread(self.data_path)
-        data = data[:, :, 1]
+
+        data = self.data
 
         [height, width] = np.shape(data)
         [y0, x0] = [int(height / 2), int(width / 2)]
@@ -53,35 +54,27 @@ class TestClass(unittest.TestCase):
 
     def test_throwing_error_when_center_format_has_wrong_format(self):
         '''assert error is thrown when center does not have the right format'''
-        bad_center = {'x0': 10,
-                      'x1': -1}
-        self.assertRaises(ValueError, CalculateRadialProfile, [], bad_center)
+        o_calculate = CalculateRadialProfile(data=self.data)
+        bad_center = (10, -1)
+        self.assertRaises(ValueError, o_calculate.add_params, bad_center)
+        bad_center = {10, 1}
+        self.assertRaises(AssertionError, o_calculate.add_params, bad_center)
+        bad_center = [10, 1]
+        self.assertRaises(AssertionError, o_calculate.add_params, bad_center)
+        bad_center = (10, 1, 3)
+        self.assertRaises(ValueError, o_calculate.add_params, bad_center)
 
     def test_throwing_error_when_angle_range_has_wrong_format(self):
         '''assert error is thrown when angle range does not have the right format'''
-        bad_angle_range = {'from': 10,
-                           'too': 20}
-        self.assertRaises(ValueError, CalculateRadialProfile, [], {}, bad_angle_range)
-
-    # def test_angle_conversion_to_rad(self):
-    # '''assert angle are correctly converted to radians'''
-    # data = np.array(Image.open(self.data_path))
-    # data = data[:, :, 1]
-
-    # [height, width] = np.shape(data)
-    # [y0, x0] = [int(height/2), int(width/2)]
-    # center = {'x0': x0,
-    # 'y0': y0}
-
-    # angle_range = {'from': 0,
-    # 'to': 90}
-    # o_calculate = CalculateRadialProfile(data=data,
-    # center=center,
-    # angle_range=angle_range)
-    # o_calculate.calculate()
-
-    # assert 0 == o_calculate.from_angle_rad
-    # self.assertAlmostEqual(3.14/2, o_calculate.to_angle_rad, delta = 0.001)
+        o_calculate = CalculateRadialProfile(data=self.data)
+        bad_angle_range = (-10, 40)
+        self.assertRaises(ValueError, o_calculate.add_params, bad_angle_range)
+        bad_angle_range = {0, 90}
+        self.assertRaises(AssertionError, o_calculate.add_params, bad_angle_range)
+        bad_angle_range = [0, 90]
+        self.assertRaises(AssertionError, o_calculate.add_params, bad_angle_range)
+        bad_angle_range = (90, 180, 270)
+        self.assertRaises(ValueError, o_calculate.add_params, bad_angle_range)
 
     def test_calculation_of_radius_array(self):
         '''assert that the array of pixel radius is correct'''
@@ -140,11 +133,10 @@ class TestClass(unittest.TestCase):
         o_calculate.add_params(center=center, angle_range=angle_range)
         o_calculate.calculate()
         working_data = o_calculate.working_data
-
         real_working_data = np.zeros((10, 10))
+        real_working_data[:] = np.nan
         real_working_data[0:6, 5:, ] = 1
-
-        assert (working_data == real_working_data).all()
+        assert (working_data[0:6, 5:, ] == real_working_data[0:6, 5:, ]).all()
 
     def test_sort_indices_of_radius(self):
         '''assert the array of radius indices is correctly sorted'''
@@ -174,53 +166,26 @@ class TestClass(unittest.TestCase):
         sorted_radius = o_calculate.sorted_radius
 
         assert 0 == sorted_radius[0]
-        self.assertAlmostEqual(7.071, sorted_radius[-1], delta=0.01)
+        self.assertAlmostEqual(6.4031, sorted_radius[-1], delta=0.01)
 
     def test_working_data_correctly_sorted(self):
         '''assert the working data are correctly sorted according to the pixel radius'''
         data = np.ones((10, 10))
+        data[5][4] = 100
         [height, width] = np.shape(data)
         [y0, x0] = [int(height / 2), int(width / 2)]
         center = (x0, y0)
-        angle_range = (0, 90)
+        angle_range = None
         o_calculate = CalculateRadialProfile(data=data)
         o_calculate.add_params(center=center, angle_range=angle_range)
         o_calculate.calculate()
         data_sorted_by_radius = o_calculate.data_sorted_by_radius
 
-        assert ([1, 1, 0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1] == data_sorted_by_radius[:16]).all()
-
-    def test_radius_bins_location(self):
-        '''assert the location of radius bins'''
-        data = np.ones((10, 10))
-        [height, width] = np.shape(data)
-        [y0, x0] = [int(height / 2), int(width / 2)]
-        center = (x0, y0)
-        angle_range = (0, 90)
-        o_calculate = CalculateRadialProfile(data=data)
-        o_calculate.add_params(center=center, angle_range=angle_range)
-        o_calculate.calculate()
-        radius_bins_location = o_calculate.radius_bins_location
-
-        assert ([0, 8, 24, 44, 68, 94, 98] == radius_bins_location).all()
-
-    def test_radius_bins_size(self):
-        '''assert the size of the radius bins'''
-        data = np.ones((10, 10))
-        [height, width] = np.shape(data)
-        [y0, x0] = [int(height / 2), int(width / 2)]
-        center = (x0, y0)
-        angle_range = (0, 90)
-        o_calculate = CalculateRadialProfile(data=data)
-        o_calculate.add_params(center=center, angle_range=angle_range)
-        o_calculate.calculate()
-        radius_bins_size = o_calculate.radius_bins_size
-
-        assert ([8, 16, 20, 24, 26, 4] == radius_bins_size).all()
+        assert ([1., 1., 100., 1.] == data_sorted_by_radius[:4]).all()
 
     def test_profile(self):
         '''assert the final profil'''
-        data = np.ones((10, 10))
+        data = self.data
         [height, width] = np.shape(data)
         [y0, x0] = [int(height / 2), int(width / 2)]
         center = (x0, y0)
@@ -229,8 +194,7 @@ class TestClass(unittest.TestCase):
         o_calculate.add_params(center=center, angle_range=angle_range)
         o_calculate.calculate()
         radial_profile = o_calculate.radial_profile
-
-        self.assertAlmostEquals(0.375, radial_profile[0], delta=0.01)
-        self.assertAlmostEqual(0.313, radial_profile[1], delta=0.01)
-        self.assertAlmostEqual(0.3, radial_profile[2], delta=0.01)
-        self.assertAlmostEqual(0.292, radial_profile[3], delta=0.01)
+        self.assertAlmostEqual(0.005267, radial_profile['mean'][0], delta=0.0001)
+        self.assertAlmostEqual(0.005289, radial_profile['mean'][1], delta=0.0001)
+        self.assertAlmostEqual(0.005310, radial_profile['mean'][2], delta=0.0001)
+        self.assertAlmostEqual(0.005312, radial_profile['mean'][3], delta=0.0001)

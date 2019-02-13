@@ -12,10 +12,10 @@ class CalculateRadialProfile(object):
         :type data: np.array
         """
         self.data = data
-        _shape = data.shape
-        if len(_shape) not in [2, 3]:
+        self.dimension = len(data.shape)
+        if self.dimension not in [2, 3]:
             raise ValueError('Only 2D or 3D np.array are supported.')
-        self.bool_2d = len(_shape) == 2  # boolean indicator of data dimension, True: 2D, False: 3D
+        self.bool_2d = self.dimension == 2  # boolean indicator of data dimension, True: 2D, False: 3D
         self.center = None
         self.radius = None
         self.angle_range = None
@@ -33,12 +33,30 @@ class CalculateRadialProfile(object):
         self.final_data_array = None
 
     def add_params(self, center: tuple, radius=None, angle_range=None):
+        self._validate_params(center=center, radius=radius, angle_range=angle_range)
         self.center = center
         self.radius = radius
         self.angle_range = angle_range
         self.x0 = self.center[0]
         self.y0 = self.center[1]
         self.param_list.append(form_param_dict(center=center, radius=radius, angle_range=angle_range))
+
+    def _validate_params(self, center, radius, angle_range):
+        assert type(center) == tuple
+        if len(center) != self.dimension:
+            raise ValueError("'center' input is not dimensionally correct for input data.")
+        for each in center:
+            if each < 0:
+                raise ValueError("'center' input can not be negative.")
+        if radius is not None:
+            if radius <= 0:
+                raise ValueError("'radius' has to be greater than zero.")
+        if angle_range is not None:
+            assert type(angle_range) == tuple
+            assert len(angle_range) == 2
+            for each in angle_range:
+                if each < 0:
+                    raise ValueError("'angle_range' has to be within (0, 360).")
 
     def calculate(self):
         """
