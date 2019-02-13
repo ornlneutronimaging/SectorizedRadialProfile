@@ -1,35 +1,5 @@
 import numpy as np
 import pandas as pd
-from cerberus import Validator
-
-
-# schema = {
-#     'center': {'type': 'tuple'},
-#     'radius': {'type': 'float', 'min': 0},
-#     'angle_range': {'type': 'float', 'min': 0, 'max': 360},
-#     'angle_to': {'type': 'float', 'min': 0, 'max': 360},
-# }
-# v = Validator(schema)
-
-def form_param_dict(center: tuple, radius: float, angle_range):
-    """
-
-    :param center: coordinates in form of (x,y) or (x, y, z)
-    :type center: tuple
-    :param radius: radius of the radial plot range
-    :type radius: float
-    :param angle_range: optional sector defined using tuple, eg. (0, 360)
-    :type angle_range: tuple
-    :return: shaped dictionary containing parameters
-    :rtype: dict
-    """
-    _dict = {
-        'center': center,
-        'radius': radius,
-        'angle_range': angle_range
-    }
-    return _dict
-
 
 class CalculateRadialProfile(object):
     # radial_profile = []
@@ -61,7 +31,12 @@ class CalculateRadialProfile(object):
         self.final_radius_array = None
         self.final_data_array = None
 
-    def add_params(self, center: tuple, radius: float, angle_range=None):
+    def add_params(self, center: tuple, radius=None, angle_range=None):
+        self.center = center
+        self.radius = radius
+        self.angle_range = angle_range
+        self.x0 = self.center[0]
+        self.y0 = self.center[1]
         self.param_list.append(form_param_dict(center=center, radius=radius, angle_range=angle_range))
 
     def calculate(self):
@@ -70,14 +45,19 @@ class CalculateRadialProfile(object):
         :return:
         :rtype:
         """
-        _final_radius_array = []
-        _final_data_array = []
+        # _final_radius_array = []
+        # _final_data_array = []
+        _final_radius_array = np.array([])
+        _final_data_array = np.array([])
         for each_param_dict in self.param_list:
             _current_radius_array, _current_data_array = self.get_sorted_radial_array(each_param_dict)
-            _final_radius_array.append(_current_radius_array)
-            _final_data_array.append(_current_data_array)
-        self.final_radius_array = _final_radius_array
-        self.final_data_array = _final_data_array
+            # _final_radius_array = _final_radius_array + _current_radius_array
+            # _final_data_array = _final_data_array + _current_data_array
+            # numpy.concatenate((a1, a2, ...), axis=0, out=None)
+            _final_radius_array = np.concatenate((_final_radius_array, _current_radius_array), axis=None)
+            _final_data_array = np.concatenate((_final_data_array, _current_data_array), axis=None)
+        self.final_radius_array = np.array(_final_radius_array)
+        self.final_data_array = np.array(_final_data_array)
         self.calculate_profile()
 
     def calculate_profile(self):
@@ -106,11 +86,8 @@ class CalculateRadialProfile(object):
         self.calculate_pixels_angle_position()
         self.turn_off_data_outside()
         self.sort_indices_of_radius()
-        # self.sort_radius()
         self.sort_data_by_radius_value()
-        # self.calculate_radius_bins_location()
-        # self.calculate_radius_bins_size()
-        return list(self.sorted_radius[:]), list(self.data_sorted_by_radius[:])
+        return self.sorted_radius[:], self.data_sorted_by_radius[:]
 
     def sort_data_by_radius_value(self):
         '''sort the working data by radius indices'''
@@ -184,3 +161,54 @@ class CalculateRadialProfile(object):
     # to evaluate the angle range with the the angle position of each pixel'''
     # self.from_angle_rad = np.deg2rad(self.from_angle)
     # self.to_angle_rad = np.deg2rad(self.to_angle)
+
+
+# schema = {
+#     'center': {'type': 'tuple'},
+#     'radius': {'type': 'float', 'min': 0},
+#     'angle_range': {'type': 'float', 'min': 0, 'max': 360},
+#     'angle_to': {'type': 'float', 'min': 0, 'max': 360},
+# }
+# v = Validator(schema)
+
+def load_label_analysis_amira(file_path, drop=None, z_flipper=None):
+    _df_amira = pd.read_csv(file_path, skiprows=1)
+    _df_amira.insert(loc=1, column='EqRadius', value=_df_amira['EqDiameter'] / 2)
+    print(_df_amira)
+    if drop is not None:
+        _df_amira.drop(index=drop, inplace=True)
+        _df_amira.reset_index(drop=True, inplace=True)
+    if z_flipper is not None:
+        _df_amira['BaryCenterZ'] = z_flipper - _df_amira['BaryCenterZ']
+    df_amira = _df_amira.round(decimals=0)
+    print(_df_amira)
+    _analysis_dict = {}
+    for _i, _each in enumerate(df_amira['index']):
+        _name = 'obj_' + str(_each)
+        _analysis_dict[_name] = [
+            (df_amira['BaryCenterX'][_i],
+             df_amira['BaryCenterY'][_i],
+             df_amira['BaryCenterZ'][_i]),
+            df_amira['EqRadius'][_i]
+        ]
+    return _analysis_dict
+
+
+def form_param_dict(center: tuple, radius: float, angle_range):
+    """
+
+    :param center: coordinates in form of (x,y) or (x, y, z)
+    :type center: tuple
+    :param radius: radius of the radial plot range
+    :type radius: float
+    :param angle_range: optional sector defined using tuple, eg. (0, 360)
+    :type angle_range: tuple
+    :return: shaped dictionary containing parameters
+    :rtype: dict
+    """
+    _dict = {
+        'center': center,
+        'radius': radius,
+        'angle_range': angle_range
+    }
+    return _dict

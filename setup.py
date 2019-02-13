@@ -11,7 +11,8 @@ setup(
     test_suite = 'tests',
     install_requires = [
         'numpy',
-        'pyfits',
+        'pandas',
+        'skimage',
         'pillow',
     ],
     dependency_links = [

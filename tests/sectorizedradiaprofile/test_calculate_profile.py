@@ -12,26 +12,23 @@ class TestClass(unittest.TestCase):
         _file_path = os.path.dirname(__file__)
         self.data_path = os.path.abspath(os.path.join(_file_path, '../../notebooks/data_2_circles.tif'))
 
-    def test_default_initialization(self):
-        """assert if all parameters are coorectly set up when no parameters passed in"""
-        o_calculate = CalculateRadialProfile()
-        assert o_calculate.data == []
-        assert o_calculate.center == {}
-        assert o_calculate.angle_range == {}
+    # def test_default_initialization(self):
+    #     """assert if all parameters are coorectly set up when no parameters passed in"""
+    #     o_calculate = CalculateRadialProfile()
+    #     assert o_calculate.data == []
+    #     assert o_calculate.center == {}
+    #     assert o_calculate.angle_range == {}
 
     def test_initialization(self):
         '''assert all parameters are correctly set up when parameters passed in'''
-        my_data = np.array([1, 2, 3])
-        my_center = {'x0': 0.5,
-                     'y0': 1.1}
-        my_angle_range = {'from': 0,
-                          'to': 90}
-        o_calculate = CalculateRadialProfile(data=my_data,
-                                             center=my_center,
-                                             angle_range=my_angle_range)
-        assert (o_calculate.data == my_data).all()
-        assert o_calculate.center == my_center
-        assert o_calculate.angle_range == my_angle_range
+        my_data_2d = np.array([[1, 2, 3], [1, 2, 3]])
+        o_calculate = CalculateRadialProfile(data=my_data_2d)
+        assert (o_calculate.data == my_data_2d).all()
+        my_data_3d = np.array([[1, 2, 3], [1, 2, 3], [0, 0, 0]])
+        o_calculate = CalculateRadialProfile(data=my_data_3d)
+        assert (o_calculate.data == my_data_3d).all()
+        bad_dimension_data = np.array([1, 2, 3])
+        self.assertRaises(ValueError, CalculateRadialProfile, bad_dimension_data)
 
     def test_initialization_real_case(self):
         '''assert all parameters are correctly set up when real parameters are passed in'''
@@ -41,22 +38,18 @@ class TestClass(unittest.TestCase):
 
         [height, width] = np.shape(data)
         [y0, x0] = [int(height / 2), int(width / 2)]
-        center = {'x0': x0,
-                  'y0': y0}
+        center = (x0, y0)
+        angle_range = (0, 90)
 
-        angle_range = {'from': 0,
-                       'to': 90}
-        o_calculate = CalculateRadialProfile(data=data,
-                                             center=center,
-                                             angle_range=angle_range)
-
+        o_calculate = CalculateRadialProfile(data=data)
+        o_calculate.add_params(center=center, angle_range=angle_range)
         assert (o_calculate.data == data).all()
         assert o_calculate.center == center
         assert o_calculate.angle_range == angle_range
-        assert o_calculate.x0 == center['x0']
-        assert o_calculate.y0 == center['y0']
-        assert o_calculate.from_angle == angle_range['from']
-        assert o_calculate.to_angle == angle_range['to']
+        assert o_calculate.x0 == center[0]
+        assert o_calculate.y0 == center[1]
+        # assert o_calculate.from_angle == angle_range[0]
+        # assert o_calculate.to_angle == angle_range[1]
 
     def test_throwing_error_when_center_format_has_wrong_format(self):
         '''assert error is thrown when center does not have the right format'''
@@ -95,14 +88,11 @@ class TestClass(unittest.TestCase):
         data = np.ones((10, 10))
         [height, width] = np.shape(data)
         [y0, x0] = [int(height / 2), int(width / 2)]
-        center = {'x0': x0,
-                  'y0': y0}
+        center = (x0, y0)
+        angle_range = (0, 90)
+        o_calculate = CalculateRadialProfile(data=data)
+        o_calculate.add_params(center=center, angle_range=angle_range)
 
-        angle_range = {'from': 0,
-                       'to': 90}
-        o_calculate = CalculateRadialProfile(data=data,
-                                             center=center,
-                                             angle_range=angle_range)
         o_calculate.calculate()
 
         _radius_array = o_calculate.radius_array
@@ -114,15 +104,11 @@ class TestClass(unittest.TestCase):
         data = np.ones((20, 10))
         [height, width] = np.shape(data)
         [y0, x0] = [int(height / 2), int(width / 2)]
-        center = {'x0': x0,
-                  'y0': y0}
+        center = (x0, y0)
+        angle_range = (0, 90)
+        o_calculate = CalculateRadialProfile(data=data)
+        o_calculate.add_params(center=center, angle_range=angle_range)
 
-        angle_range = {'from': 0,
-                       'to': 90}
-        o_calculate = CalculateRadialProfile(data=data,
-                                             center=center,
-                                             angle_range=angle_range)
-        o_calculate.calculate_array_size()
         assert 10 == o_calculate.x_len
         assert 20 == o_calculate.y_len
 
@@ -131,14 +117,10 @@ class TestClass(unittest.TestCase):
         data = np.ones((10, 10))
         [height, width] = np.shape(data)
         [y0, x0] = [int(height / 2), int(width / 2)]
-        center = {'x0': x0,
-                  'y0': y0}
-
-        angle_range = {'from': 0,
-                       'to': 90}
-        o_calculate = CalculateRadialProfile(data=data,
-                                             center=center,
-                                             angle_range=angle_range)
+        center = (x0, y0)
+        angle_range = (0, 90)
+        o_calculate = CalculateRadialProfile(data=data)
+        o_calculate.add_params(center=center, angle_range=angle_range)
         o_calculate.calculate()
         array_angle_deg = o_calculate.array_angle_deg
 
@@ -152,14 +134,10 @@ class TestClass(unittest.TestCase):
         data = np.ones((10, 10))
         [height, width] = np.shape(data)
         [y0, x0] = [int(height / 2), int(width / 2)]
-        center = {'x0': x0,
-                  'y0': y0}
-
-        angle_range = {'from': 0,
-                       'to': 90}
-        o_calculate = CalculateRadialProfile(data=data,
-                                             center=center,
-                                             angle_range=angle_range)
+        center = (x0, y0)
+        angle_range = (0, 90)
+        o_calculate = CalculateRadialProfile(data=data)
+        o_calculate.add_params(center=center, angle_range=angle_range)
         o_calculate.calculate()
         working_data = o_calculate.working_data
 
@@ -173,14 +151,10 @@ class TestClass(unittest.TestCase):
         data = np.ones((10, 10))
         [height, width] = np.shape(data)
         [y0, x0] = [int(height / 2), int(width / 2)]
-        center = {'x0': x0,
-                  'y0': y0}
-
-        angle_range = {'from': 0,
-                       'to': 90}
-        o_calculate = CalculateRadialProfile(data=data,
-                                             center=center,
-                                             angle_range=angle_range)
+        center = (x0, y0)
+        angle_range = (0, 90)
+        o_calculate = CalculateRadialProfile(data=data)
+        o_calculate.add_params(center=center, angle_range=angle_range)
         o_calculate.calculate()
         sorted_radius_indices = o_calculate.sorted_radius_indices
 
@@ -192,14 +166,10 @@ class TestClass(unittest.TestCase):
         data = np.ones((10, 10))
         [height, width] = np.shape(data)
         [y0, x0] = [int(height / 2), int(width / 2)]
-        center = {'x0': x0,
-                  'y0': y0}
-
-        angle_range = {'from': 0,
-                       'to': 90}
-        o_calculate = CalculateRadialProfile(data=data,
-                                             center=center,
-                                             angle_range=angle_range)
+        center = (x0, y0)
+        angle_range = (0, 90)
+        o_calculate = CalculateRadialProfile(data=data)
+        o_calculate.add_params(center=center, angle_range=angle_range)
         o_calculate.calculate()
         sorted_radius = o_calculate.sorted_radius
 
@@ -211,14 +181,10 @@ class TestClass(unittest.TestCase):
         data = np.ones((10, 10))
         [height, width] = np.shape(data)
         [y0, x0] = [int(height / 2), int(width / 2)]
-        center = {'x0': x0,
-                  'y0': y0}
-
-        angle_range = {'from': 0,
-                       'to': 90}
-        o_calculate = CalculateRadialProfile(data=data,
-                                             center=center,
-                                             angle_range=angle_range)
+        center = (x0, y0)
+        angle_range = (0, 90)
+        o_calculate = CalculateRadialProfile(data=data)
+        o_calculate.add_params(center=center, angle_range=angle_range)
         o_calculate.calculate()
         data_sorted_by_radius = o_calculate.data_sorted_by_radius
 
@@ -229,14 +195,10 @@ class TestClass(unittest.TestCase):
         data = np.ones((10, 10))
         [height, width] = np.shape(data)
         [y0, x0] = [int(height / 2), int(width / 2)]
-        center = {'x0': x0,
-                  'y0': y0}
-
-        angle_range = {'from': 0,
-                       'to': 90}
-        o_calculate = CalculateRadialProfile(data=data,
-                                             center=center,
-                                             angle_range=angle_range)
+        center = (x0, y0)
+        angle_range = (0, 90)
+        o_calculate = CalculateRadialProfile(data=data)
+        o_calculate.add_params(center=center, angle_range=angle_range)
         o_calculate.calculate()
         radius_bins_location = o_calculate.radius_bins_location
 
@@ -247,14 +209,10 @@ class TestClass(unittest.TestCase):
         data = np.ones((10, 10))
         [height, width] = np.shape(data)
         [y0, x0] = [int(height / 2), int(width / 2)]
-        center = {'x0': x0,
-                  'y0': y0}
-
-        angle_range = {'from': 0,
-                       'to': 90}
-        o_calculate = CalculateRadialProfile(data=data,
-                                             center=center,
-                                             angle_range=angle_range)
+        center = (x0, y0)
+        angle_range = (0, 90)
+        o_calculate = CalculateRadialProfile(data=data)
+        o_calculate.add_params(center=center, angle_range=angle_range)
         o_calculate.calculate()
         radius_bins_size = o_calculate.radius_bins_size
 
@@ -265,14 +223,10 @@ class TestClass(unittest.TestCase):
         data = np.ones((10, 10))
         [height, width] = np.shape(data)
         [y0, x0] = [int(height / 2), int(width / 2)]
-        center = {'x0': x0,
-                  'y0': y0}
-
-        angle_range = {'from': 0,
-                       'to': 90}
-        o_calculate = CalculateRadialProfile(data=data,
-                                             center=center,
-                                             angle_range=angle_range)
+        center = (x0, y0)
+        angle_range = (0, 90)
+        o_calculate = CalculateRadialProfile(data=data)
+        o_calculate.add_params(center=center, angle_range=angle_range)
         o_calculate.calculate()
         radial_profile = o_calculate.radial_profile
 
