@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 from setuptools import setup, find_packages
+import sectorizedradialprofile
 
 setup(
     name="sectorizedradialprofile",
-    version="1.0.0",
+    version=sectorizedradialprofile.__version__,
     author="Jean Bilheux",
     author_email="bilheuxjm@ornl.gov",
     packages=find_packages(exclude=['tests', 'notebooks']),
