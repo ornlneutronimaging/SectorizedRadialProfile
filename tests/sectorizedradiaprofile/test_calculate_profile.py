@@ -91,7 +91,7 @@ class TestClass(unittest.TestCase):
 
         _radius_array = o_calculate.radius_array
         assert _radius_array[y0, x0] == 0  # center of circle
-        self.assertAlmostEquals(_radius_array[0, 0], 7.071, delta=0.01)
+        assert _radius_array[0, 0] == pytest.approx(7.071, abs=0.01)
 
     def test_report_size_of_image(self):
         '''assert the size of the array is correctly retrieved'''
