@@ -101,6 +101,7 @@ class CalculateRadialProfile(object):
         _not_nan_indices = np.invert(_nan_indices)
         self.data_sorted_by_radius = _data_sorted_by_radius[_not_nan_indices]
         self.sorted_radius = _sorted_radius[_not_nan_indices]
+        # print(self.sorted_radius)
 
     def sort_indices_of_radius(self):
         '''sort the indices of the radius array'''
@@ -127,12 +128,15 @@ class CalculateRadialProfile(object):
 
     def calculate_pixels_angle_position(self):
         '''determine the angle position related to the top vertical center of
-        each pixel in radians'''
+        each pixel in degrees'''
         if self.angle_range is not None:
             if self.bool_2d:
-                complex_array = (self.y_len - self.y_index - self.y0) + 1j * \
+                complex_array = (self.y_index - self.y0) + 1j * \
                                 (self.x_index - self.x0)
-                array_angle_deg = np.angle(complex_array, deg=True)
+                # complex_array = (self.y_len - self.y_index - self.y0) + 1j * \
+                #                 (self.x_index - self.x0)
+                array_angle_deg = np.abs(np.angle(complex_array, deg=True) - 180)
+                self.intermediate_array_angle_deg = array_angle_deg
 
                 # removing all negative angles -> [0, 360[
                 array_angle_deg_pos = np.array(array_angle_deg)
