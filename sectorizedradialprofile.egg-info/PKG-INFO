@@ -1,6 +1,6 @@
 Metadata-Version: 1.1
 Name: sectorizedradialprofile
-Version: 1.0.0
+Version: 1.1.0
 Summary: Radial profile of a given sector of an 2D array
 Home-page: https://github.com/JeanBilheux/SectorizedRadialProfile
 Author: Jean Bilheux
@@ -12,5 +12,4 @@ Platform: UNKNOWN
 Classifier: Development Status :: 3 - Alpha
 Classifier: Topic :: Scientific/Engineering :: Physics
 Classifier: Intended Audience :: Developers
-Classifier: Programming Language :: Python :: 3.5
 Classifier: Programming Language :: Python :: 3.6

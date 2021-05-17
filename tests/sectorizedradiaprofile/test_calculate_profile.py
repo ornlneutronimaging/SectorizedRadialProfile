@@ -1,4 +1,5 @@
 import unittest
+import pytest
 import numpy as np
 import os
 from skimage import io
@@ -198,3 +199,24 @@ class TestClass(unittest.TestCase):
         self.assertAlmostEqual(0.005289, radial_profile['mean'][1], delta=0.0001)
         self.assertAlmostEqual(0.005310, radial_profile['mean'][2], delta=0.0001)
         self.assertAlmostEqual(0.005312, radial_profile['mean'][3], delta=0.0001)
+
+    def test_full_radial_profile(self):
+        _file_path = os.path.dirname(__file__)
+        data_path = os.path.abspath(os.path.join(_file_path, '../../notebooks/circle_profile.tif'))
+        data = io.imread(data_path)
+        o_calculate = CalculateRadialProfile(data=data)
+        center = (500, 600)
+        o_calculate.add_params(center=center)
+        o_calculate.calculate()
+        radial_profile = o_calculate.radial_profile
+
+        radius_returned = radial_profile.index
+        mean_counts_returned = np.array(radial_profile["mean"])
+
+        radius_expected = [0, 1.0, 1.4142, 2.0, 2.236, 2.8284]
+        for _expected, _returned in zip(radius_expected, radius_returned):
+            assert _returned == pytest.approx(_expected, abs=1e-2)
+
+        mean_counts_expected = [0.7, 1.14, 1.4977]
+        for _expected, _returned in zip(mean_counts_expected, mean_counts_returned):
+            assert _returned == pytest.approx(_expected, abs=1e-2)
