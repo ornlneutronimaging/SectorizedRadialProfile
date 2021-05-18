@@ -170,7 +170,7 @@ class TestClass(unittest.TestCase):
         o_calculate.calculate()
         sorted_radius = o_calculate.sorted_radius
 
-        assert 0 == sorted_radius[0]
+        assert 1 == sorted_radius[0]  # pixel 0 is never used
         self.assertAlmostEqual(6.4031, sorted_radius[-1], delta=0.01)
 
     def test_working_data_correctly_sorted(self):
