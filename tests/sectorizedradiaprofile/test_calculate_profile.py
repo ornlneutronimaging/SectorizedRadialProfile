@@ -217,10 +217,9 @@ class TestClass(unittest.TestCase):
         for _expected, _returned in zip(radius_expected, radius_returned):
             assert _returned == pytest.approx(_expected, abs=1e-2)
 
-        mean_counts_expected = [0.7, 1.14, 1.4977]
+        mean_counts_expected = [500.70709, 501.14412, 501.49767]
         for _expected, _returned in zip(mean_counts_expected, mean_counts_returned):
             assert _returned == pytest.approx(_expected, abs=1e-2)
-        assert False
 
     def test_partial_radial_profile(self):
         _file_path = os.path.dirname(__file__)
