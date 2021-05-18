@@ -119,7 +119,7 @@ class TestClass(unittest.TestCase):
         array_angle_deg = o_calculate.array_angle_deg
 
         assert array_angle_deg[0, 0] == 315
-        assert array_angle_deg[y0, x0] == 0
+        assert array_angle_deg[y0, x0] == 180
         assert array_angle_deg[np.int(height / 2), 0] == 270
         self.assertAlmostEqual(array_angle_deg[height - 1, 0], 231.3, delta=0.1)
 
@@ -230,20 +230,8 @@ class TestClass(unittest.TestCase):
         center = (500, 600)
         angle_range = (0, 90)
 
-        print("==== partial ====")
         o_calculate.add_params(center=center, angle_range=angle_range)
         o_calculate.calculate()
-        print(o_calculate.radial_profile)
-
-        # print(o_calculate.final_radius_array)
-
-        print("==== full ====")
-        o_calculate = CalculateRadialProfile(data=data)
-        o_calculate.add_params(center=center)
-        o_calculate.calculate()
-        print(o_calculate.radial_profile)
-
-
 
         # radial_profile = o_calculate.radial_profile
         #
