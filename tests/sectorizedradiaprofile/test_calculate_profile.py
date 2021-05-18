@@ -13,6 +13,9 @@ class TestClass(unittest.TestCase):
         _file_path = os.path.dirname(__file__)
         self.data_path = os.path.abspath(os.path.join(_file_path, '../../notebooks/data2d_for_test_1.tif'))
         self.data = io.imread(self.data_path)
+        self.data_path2 = os.path.abspath(os.path.join(_file_path, '../../notebooks/data_2_circles.tif'))
+        _tmp_data = io.imread(self.data_path2)
+        self.data2 = _tmp_data[:, :, 0]
 
     # def test_default_initialization(self):
     #     """assert if all parameters are coorectly set up when no parameters passed in"""
@@ -186,8 +189,8 @@ class TestClass(unittest.TestCase):
         assert ([1., 1., 100., 1.] == data_sorted_by_radius[:4]).all()
 
     def test_profile(self):
-        '''assert the final profil'''
-        data = self.data
+        '''assert the final profile'''
+        data = self.data2
         [height, width] = np.shape(data)
         [y0, x0] = [int(height / 2), int(width / 2)]
         center = (x0, y0)
@@ -196,10 +199,11 @@ class TestClass(unittest.TestCase):
         o_calculate.add_params(center=center, angle_range=angle_range)
         o_calculate.calculate()
         radial_profile = o_calculate.radial_profile
-        self.assertAlmostEqual(0.005267, radial_profile['mean'][0], delta=0.0001)
-        self.assertAlmostEqual(0.005289, radial_profile['mean'][1], delta=0.0001)
-        self.assertAlmostEqual(0.005310, radial_profile['mean'][2], delta=0.0001)
-        self.assertAlmostEqual(0.005312, radial_profile['mean'][3], delta=0.0001)
+        radial_profile_array = np.array(radial_profile['mean'])
+        self.assertAlmostEqual(255, radial_profile_array[0], delta=0.0001)
+        self.assertAlmostEqual(255, radial_profile_array[1], delta=0.0001)
+        self.assertAlmostEqual(255, radial_profile_array[2], delta=0.0001)
+        self.assertAlmostEqual(255, radial_profile_array[3], delta=0.0001)
 
     def test_full_radial_profile(self):
         _file_path = os.path.dirname(__file__)
