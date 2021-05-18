@@ -137,7 +137,8 @@ class TestClass(unittest.TestCase):
         real_working_data = np.zeros((10, 10))
         real_working_data[:] = np.nan
         real_working_data[0:6, 5:, ] = 1
-        assert (working_data[0:6, 5:, ] == real_working_data[0:6, 5:, ]).all()
+        real_working_data[y0, x0] = np.nan
+        assert (working_data[0:5, 6:, ] == real_working_data[0:5, 6:, ]).all()
 
     def test_sort_indices_of_radius(self):
         '''assert the array of radius indices is correctly sorted'''

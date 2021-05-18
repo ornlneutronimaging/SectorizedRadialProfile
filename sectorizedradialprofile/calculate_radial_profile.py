@@ -123,7 +123,7 @@ class CalculateRadialProfile(object):
 
         working_data = np.array(self.data, dtype=np.float64)  # forced array to be float so NaN can be used
         working_data[not_keep_indices] = np.nan  # replaced 0 with NaN so the mean & std can be calculated correctly
-        working_data[self.y0, self.x0] = 1  # make sure center is part of the pixel to keep
+        #working_data[self.y0, self.x0] = 1  # make sure center is part of the pixel to keep
 
         self.working_data = working_data
 
