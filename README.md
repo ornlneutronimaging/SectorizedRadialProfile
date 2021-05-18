@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/JeanBilheux/SectorizedRadialProfile.svg?branch=master)](https://travis-ci.org/JeanBilheux/SectorizedRadialProfile)
+[![Build Status](https://travis-ci.org/ornlneutronimaging/SectorizedRadialProfile.svg?branch=master)](https://travis-ci.org/ornlneutronimaging/SectorizedRadialProfile)
 [![codecov](https://codecov.io/gh/JeanBilheux/SectorizedRadialProfile/branch/master/graph/badge.svg)](https://codecov.io/gh/JeanBilheux/SectorizedRadialProfile)
 [![PyPI version](https://badge.fury.io/py/sectorizedradialprofile.svg)](https://badge.fury.io/py/sectorizedradialprofile)
 
