@@ -229,23 +229,17 @@ class TestClass(unittest.TestCase):
         o_calculate = CalculateRadialProfile(data=data)
         center = (500, 600)
         angle_range = (0, 90)
-
         o_calculate.add_params(center=center, angle_range=angle_range)
         o_calculate.calculate()
 
-        # radial_profile = o_calculate.radial_profile
-        #
-        # radius_returned = radial_profile.index
-        # mean_counts_returned = np.array(radial_profile["mean"])
-        #
-        # print(radius_returned)
-        #
-        # radius_expected = [0, 1.0, 1.4142, 2.0, 2.236, 2.8284]
-        # for _expected, _returned in zip(radius_expected, radius_returned):
-        #     assert _returned == pytest.approx(_expected, abs=1e-2)
-        #
-        # mean_counts_expected = [0.7, 1.14, 1.4977]
-        # for _expected, _returned in zip(mean_counts_expected, mean_counts_returned):
-        #     assert _returned == pytest.approx(_expected, abs=1e-2)
+        radial_profile = o_calculate.radial_profile
+        radius_returned = radial_profile.index
+        mean_counts_returned = np.array(radial_profile["mean"])
 
-        assert False
+        radius_expected = [1.0, 1.4142, 2.0, 2.236, 2.8284]
+        for _expected, _returned in zip(radius_expected, radius_returned):
+            assert _returned == pytest.approx(_expected, abs=1e-2)
+
+        mean_counts_expected = [501.144, 501.581, 502.065]
+        for _expected, _returned in zip(mean_counts_expected, mean_counts_returned):
+            assert _returned == pytest.approx(_expected, abs=1e-2)
